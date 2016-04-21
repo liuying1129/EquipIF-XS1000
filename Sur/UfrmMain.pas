@@ -388,9 +388,10 @@ var
   //=========
 
   s1:string;
-  i0:integer;
-  i1:integer;//第几次做该标本号
+  i0:TDateTime;//上次检验时间
+  i1:TDateTime;//本次检验时间
   sName:string;//文件名
+  fs:TFormatSettings;
 begin
   sName:=ExtractFileName(filename);
   
@@ -401,22 +402,27 @@ begin
   sList.Free;
     
   ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  i0:=ini.ReadInteger(FormatDateTime('YYYYMMDD',now),s1,0);
+  i0:=ini.ReadDateTime(FormatDateTime('YYYYMMDD',now),s1,0);
   ini.Free;
 
   ls:=Tstringlist.Create;
   ls.LoadFromFile(filename);
   if ls.Count<=0 then begin ls.Free;exit;end;//如果仪器还没向cdf文件中写完，则等待写完
 
-  //取第几次做
+  //本次检验时间
   i1:=1;
   for i :=0  to ls.Count-1 do
   begin
     lsValue:=StrToList(ls[i],big_result);//将每行导入到字符串列表中
 
-    if lsValue.Count<3 then continue;
+    if lsValue.Count<20 then begin lsValue.Free;continue;end;
 
-    if lsValue[0]='1' then begin i1:=strtointdef(lsValue[2],1);lsValue.Free;break;end;
+    if lsValue[0]<>'00' then begin lsValue.Free;continue;end;
+
+    fs.DateSeparator:='-';
+    fs.TimeSeparator:=':';
+    fs.ShortDateFormat:='YYYY-MM-DD hh:nn:ss';
+    i1:=StrtoDateTimeDef(lsValue[19],i1,fs);
 
     lsValue.Free;
   end;
@@ -425,7 +431,7 @@ begin
   if i1<=i0 then begin ls.Free;exit;end;//该文件已经处理过或已处理过以前做的
   
   ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  ini.WriteInteger(FormatDateTime('YYYYMMDD',now),s1,i1);
+  ini.WriteDateTime(FormatDateTime('YYYYMMDD',now),s1,i1);
   ini.Free;
 
   if length(frmMain.memo1.Lines.Text)>=60000 then frmMain.memo1.Lines.Clear;//memo只能接受64K个字符
