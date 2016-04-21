@@ -1,0 +1,14 @@
+联机标识:cdf文件中的项目名称(第二个字段)
+
+cdf中图片字段名称(第三个字段,程序中已写死)及该图片保存在LIS中的项目：
+    HPLT:PLT
+    HRBC:RBC
+    HWBC:WBC
+    SBASO:BASO#
+    SDIFF:MPV
+    SIMI:MONO#
+    SNRBC:NRBC#
+    SPLT:HCT
+    SRET:RET#
+    SRET-E:RET%
+故这几个项目的联机标识在LIS中也写死了!
