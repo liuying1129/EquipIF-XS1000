@@ -392,6 +392,7 @@ var
   i1:TDateTime;//本次检验时间
   sName:string;//文件名
   fs:TFormatSettings;
+  s2:string;
 begin
   sName:=ExtractFileName(filename);
   
@@ -416,13 +417,14 @@ begin
     lsValue:=StrToList(ls[i],big_result);//将每行导入到字符串列表中
 
     if lsValue.Count<20 then begin lsValue.Free;continue;end;
+    s2:=StringReplace(lsValue[19],'/','-',[rfReplaceAll, rfIgnoreCase]);
 
     if lsValue[0]<>'00' then begin lsValue.Free;continue;end;
 
     fs.DateSeparator:='-';
     fs.TimeSeparator:=':';
     fs.ShortDateFormat:='YYYY-MM-DD hh:nn:ss';
-    i1:=StrtoDateTimeDef(lsValue[19],i1,fs);
+    i1:=StrtoDateTimeDef(s2,i1,fs);
 
     lsValue.Free;
   end;
