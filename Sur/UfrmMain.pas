@@ -389,6 +389,14 @@ var
   SPLT:string;
   SRET:string;
   SRET_E:string;
+
+  //HRBCY:string;
+  //HWDFY:string;
+  //SPLT_F:string;
+  //SPLT_O:string;
+  //SWDF:string;
+  //SWNR:string;
+  //SWPC:string;
   //=========
 
   s1:string;
@@ -461,6 +469,14 @@ begin
     if uppercase(lsValue[2])='SRET' then SRET:=lsValue[3];
     if uppercase(lsValue[2])='SRET-E' then SRET_E:=lsValue[3];
 
+    //if uppercase(lsValue[2])='HRBCY' then HRBCY:=lsValue[3];
+    //if uppercase(lsValue[2])='HWDFY' then HWDFY:=lsValue[3];
+    //if uppercase(lsValue[2])='SPLT-F' then SPLT_F:=lsValue[3];
+    //if uppercase(lsValue[2])='SPLT-O' then SPLT_O:=lsValue[3];
+    //if uppercase(lsValue[2])='SWDF' then SWDF:=lsValue[3];
+    //if uppercase(lsValue[2])='SWNR' then SWNR:=lsValue[3];
+    //if uppercase(lsValue[2])='SWPC' then SWPC:=lsValue[3];
+
     lsValue.Free;
   end;
   //============
@@ -479,17 +495,22 @@ begin
 
     if lsValue[0]='0' then SpecNo:=rightstr('0000'+lsValue[3],4);
 
-    if uppercase(lsValue[1])='PLT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HPLT])
-    else if uppercase(lsValue[1])='RBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HRBC])
-    else if uppercase(lsValue[1])='WBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HWBC])
-    else if uppercase(lsValue[1])='BASO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SBASO])
-    else if uppercase(lsValue[1])='MPV' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SDIFF])
-    else if uppercase(lsValue[1])='MONO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SIMI])
-    else if uppercase(lsValue[1])='NRBC#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SNRBC])
-    else if uppercase(lsValue[1])='HCT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SPLT])
-    else if uppercase(lsValue[1])='RET#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET])
-    else if uppercase(lsValue[1])='RET%' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET_E])
-    else ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'','']);
+    if lsValue[0]='1' then
+    begin
+      if uppercase(lsValue[1])='PLT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HPLT])
+      else if uppercase(lsValue[1])='RBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HRBC])
+      else if uppercase(lsValue[1])='WBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HWBC])
+      else if uppercase(lsValue[1])='BASO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SBASO])
+      else if uppercase(lsValue[1])='MPV' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SDIFF])
+      else if uppercase(lsValue[1])='MONO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SIMI])
+      else if uppercase(lsValue[1])='NRBC#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SNRBC])
+      else if uppercase(lsValue[1])='HCT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SPLT])
+      else if uppercase(lsValue[1])='RET#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET])
+      else if uppercase(lsValue[1])='RET%' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET_E])
+      else ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'','']);
+    end
+    else if lsValue[0]='3' then ReceiveItemInfo[i]:=VarArrayof([lsValue[2],'','',lsValue[3]])
+    else ReceiveItemInfo[i]:=VarArrayof(['','','','']);
 
     lsValue.Free;
   end;
