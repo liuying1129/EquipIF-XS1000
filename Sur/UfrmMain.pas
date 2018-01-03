@@ -410,8 +410,18 @@ begin
   
   sList:=TStringList.Create;
   ExtractStrings(['_'],[],PChar(sName),sList);
-  if sList.Count<2 then begin sList.Free;exit;end;
+  if sList.Count<3 then begin sList.Free;exit;end;
   s1:=sList[0]+'_'+sList[1];
+
+  //本次检验时间
+  i1:=1;
+  s2:=FormatDateTime('YYYY-MM-DD',now)+' '+copy(sList[2],1,2)+':'+copy(sList[2],3,2)+':'+copy(sList[2],5,2);
+  fs.DateSeparator:='-';
+  fs.TimeSeparator:=':';
+  fs.ShortDateFormat:='YYYY-MM-DD hh:nn:ss';
+  i1:=StrtoDateTimeDef(s2,i1,fs);
+  //==========
+  
   sList.Free;
     
   ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
@@ -423,7 +433,7 @@ begin
   if ls.Count<=0 then begin ls.Free;exit;end;//如果仪器还没向cdf文件中写完，则等待写完
 
   //本次检验时间
-  i1:=1;
+  {i1:=1;
   for i :=0  to ls.Count-1 do
   begin
     lsValue:=StrToList(ls[i],big_result);//将每行导入到字符串列表中
@@ -439,7 +449,7 @@ begin
     i1:=StrtoDateTimeDef(s2,i1,fs);
 
     lsValue.Free;
-  end;
+  end;//}
   //==========
 
   if i1<=i0 then begin ls.Free;exit;end;//该文件已经处理过或已处理过以前做的
