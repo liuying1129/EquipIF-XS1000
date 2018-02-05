@@ -90,6 +90,7 @@ var
   big_result:string;
   SdfDateFormat:string;//结果文件名的日期格式
   ifRecLog:boolean;//是否记录调试日志
+  ExcludeLJBS:STRING;//排除联机标识
 
 //  RFM:STRING;       //返回数据
   hnd:integer;
@@ -240,6 +241,7 @@ begin
   CombinID:=ini.ReadString(IniSection,'组合项目代码','');
 
   LisFormCaption:=ini.ReadString(IniSection,'检验系统窗体标题','');
+  ExcludeLJBS:=ini.ReadString(IniSection,'排除联机标识','');
 
   QuaContSpecNoG:=ini.ReadString(IniSection,'高值质控联机号','9999');
   QuaContSpecNo:=ini.ReadString(IniSection,'常值质控联机号','9998');
@@ -324,6 +326,7 @@ begin
       '组合项目代码'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '开机自动运行'+#2+'CheckListBox'+#2+#2+'1'+#2+#2+#3+
       '调试日志'+#2+'CheckListBox'+#2+#2+'0'+#2+'注:强烈建议在正常运行时关闭'+#2+#3+
+      '排除联机标识'+#2+'Edit'+#2+#2+'1'+#2+'多个联机标识用逗号分隔'+#2+#3+
       '高值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2+#3+
       '常值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2+#3+
       '低值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2;
@@ -378,33 +381,15 @@ var
 
   ini:Tinifile;
 
-  //图形路径
-  HPLT:string;
-  HRBC:string;
-  HWBC:string;
-  SBASO:string;
-  SDIFF:string;
-  SIMI:string;
-  SNRBC:string;
-  SPLT:string;
-  SRET:string;
-  SRET_E:string;
-
-  //HRBCY:string;
-  //HWDFY:string;
-  //SPLT_F:string;
-  //SPLT_O:string;
-  //SWDF:string;
-  //SWNR:string;
-  //SWPC:string;
-  //=========
-
   s1:string;
   i0:TDateTime;//上次检验时间
   i1:TDateTime;//本次检验时间
   sName:string;//文件名
   fs:TFormatSettings;
   s2:string;
+
+  s3:string;
+  ls3:tstrings;
 begin
   sName:=ExtractFileName(filename);
   
@@ -461,36 +446,6 @@ begin
   if length(frmMain.memo1.Lines.Text)>=60000 then frmMain.memo1.Lines.Clear;//memo只能接受64K个字符
   frmMain.memo1.Lines.Add(filename);
 
-  //取图形数据
-  for i :=0  to ls.Count-1 do
-  begin
-    lsValue:=StrToList(ls[i],big_result);//将每行导入到字符串列表中
-
-    if lsValue.Count<4 then continue;
-
-    if uppercase(lsValue[2])='HPLT' then HPLT:=lsValue[3];
-    if uppercase(lsValue[2])='HRBC' then HRBC:=lsValue[3];
-    if uppercase(lsValue[2])='HWBC' then HWBC:=lsValue[3];
-    if uppercase(lsValue[2])='SBASO' then SBASO:=lsValue[3];
-    if uppercase(lsValue[2])='SDIFF' then SDIFF:=lsValue[3];
-    if uppercase(lsValue[2])='SIMI' then SIMI:=lsValue[3];
-    if uppercase(lsValue[2])='SNRBC' then SNRBC:=lsValue[3];
-    if uppercase(lsValue[2])='SPLT' then SPLT:=lsValue[3];
-    if uppercase(lsValue[2])='SRET' then SRET:=lsValue[3];
-    if uppercase(lsValue[2])='SRET-E' then SRET_E:=lsValue[3];
-
-    //if uppercase(lsValue[2])='HRBCY' then HRBCY:=lsValue[3];
-    //if uppercase(lsValue[2])='HWDFY' then HWDFY:=lsValue[3];
-    //if uppercase(lsValue[2])='SPLT-F' then SPLT_F:=lsValue[3];
-    //if uppercase(lsValue[2])='SPLT-O' then SPLT_O:=lsValue[3];
-    //if uppercase(lsValue[2])='SWDF' then SWDF:=lsValue[3];
-    //if uppercase(lsValue[2])='SWNR' then SWNR:=lsValue[3];
-    //if uppercase(lsValue[2])='SWPC' then SWPC:=lsValue[3];
-
-    lsValue.Free;
-  end;
-  //============
-
   ReceiveItemInfo:=VarArrayCreate([0,ls.Count-1],varVariant);
 
   for i :=0  to ls.Count-1 do
@@ -507,24 +462,20 @@ begin
 
     if lsValue[0]='1' then
     begin
-      if uppercase(lsValue[1])='PLT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HPLT])
-      else if uppercase(lsValue[1])='RBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HRBC])
-      else if uppercase(lsValue[1])='WBC' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',HWBC])
-      else if uppercase(lsValue[1])='BASO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SBASO])
-      else if uppercase(lsValue[1])='MPV' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SDIFF])
-      else if uppercase(lsValue[1])='MONO#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SIMI])
-      else if uppercase(lsValue[1])='NRBC#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SNRBC])
-      else if uppercase(lsValue[1])='HCT' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SPLT])
-      else if uppercase(lsValue[1])='RET#' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET])
-      else if uppercase(lsValue[1])='RET%' then ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',SRET_E])
-      else ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'','']);
+      s3:=StringReplace(ExcludeLJBS,'，',',',[rfReplaceAll, rfIgnoreCase]);
+      ls3:=TStringList.Create;
+      ExtractStrings([','],[],PChar(s3),ls3);
+      if ls3.IndexOf(lsValue[1])<0 then
+        ReceiveItemInfo[i]:=VarArrayof([lsValue[1],lsValue[3],'',''])
+      else ReceiveItemInfo[i]:=VarArrayof(['','','','']);
+      ls3.Free;
     end
     else if lsValue[0]='3' then ReceiveItemInfo[i]:=VarArrayof([lsValue[2],'','',lsValue[3]])
     else ReceiveItemInfo[i]:=VarArrayof(['','','','']);
 
     lsValue.Free;
   end;
-  
+
   ls.Free;
 
   if bRegister then
