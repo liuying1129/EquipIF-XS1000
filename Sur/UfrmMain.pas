@@ -88,7 +88,7 @@ var
   EquipChar:string;
   path_result:string;
   big_result:string;
-  SdfDateFormat:string;//结果文件名的日期格式
+  //SdfDateFormat:string;//结果文件名的日期格式
   ifRecLog:boolean;//是否记录调试日志
   ExcludeLJBS:STRING;//排除联机标识
 
@@ -247,7 +247,7 @@ begin
   QuaContSpecNo:=ini.ReadString(IniSection,'常值质控联机号','9998');
   QuaContSpecNoD:=ini.ReadString(IniSection,'低值质控联机号','9997');
 
-  SdfDateFormat:=ini.ReadString(IniSection,'结果文件名的日期格式','YYYYMMDD');
+  //SdfDateFormat:=ini.ReadString(IniSection,'结果文件名的日期格式','YYYYMMDD');
 
   ini.Free;
 
@@ -317,7 +317,7 @@ begin
   if LoadInputPassDll then
   begin
     ss:='接口文件'+#2+'File'+#2+#2+'1'+#2+'注:一般为\Laboman4.0\lis_interface.ini'+#2+#3+
-      '结果文件名的日期格式'+#2+'Combobox'+#2+'YYYYMMDD'+#13+'YYYYMD'+#2+'0'+#2+'日期2015年1月20日,YYYYMMDD->20150120,YYYYMD->2015120'+#2+#3+
+      //'结果文件名的日期格式'+#2+'Combobox'+#2+'YYYYMMDD'+#13+'YYYYMD'+#2+'0'+#2+'日期2015年1月20日,YYYYMMDD->20150120,YYYYMD->2015120'+#2+#3+
       '工作组'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '仪器字母'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '检验系统窗体标题'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
@@ -372,46 +372,47 @@ end;
 
 procedure AFindCallBack(const filename:string;const info:tsearchrec;var quit:boolean);
 var
-  ls,lsValue,sList:tstrings;
+  ls,lsValue{,sList}:tstrings;
   i:integer;
 
   SpecNo:string;
   FInts:OleVariant;
   ReceiveItemInfo:OleVariant;
 
-  ini:Tinifile;
+  //ini:Tinifile;
 
-  s1:string;
-  i0:TDateTime;//上次检验时间
-  i1:TDateTime;//本次检验时间
-  sName:string;//文件名
-  fs:TFormatSettings;
-  s2:string;
+  //s1:string;
+  //i0:TDateTime;//上次检验时间
+  //i1:TDateTime;//本次检验时间
+  //sName:string;//文件名
+  //fs:TFormatSettings;
+  //s2:string;
 
   s3:string;
   ls3:tstrings;
+  CheckDate:string;
 begin
-  sName:=ExtractFileName(filename);
+  //sName:=ExtractFileName(filename);
   
-  sList:=TStringList.Create;
-  ExtractStrings(['_'],[],PChar(sName),sList);
-  if sList.Count<3 then begin sList.Free;exit;end;
-  s1:=sList[0]+'_'+sList[1];
+  //sList:=TStringList.Create;
+  //ExtractStrings(['_'],[],PChar(sName),sList);
+  //if sList.Count<3 then begin sList.Free;exit;end;
+  //s1:=sList[0]+'_'+sList[1];
 
   //本次检验时间
-  i1:=1;
-  s2:=FormatDateTime('YYYY-MM-DD',now)+' '+copy(sList[2],1,2)+':'+copy(sList[2],3,2)+':'+copy(sList[2],5,2);
-  fs.DateSeparator:='-';
-  fs.TimeSeparator:=':';
-  fs.ShortDateFormat:='YYYY-MM-DD hh:nn:ss';
-  i1:=StrtoDateTimeDef(s2,i1,fs);
+  //i1:=1;
+  //s2:=FormatDateTime('YYYY-MM-DD',now)+' '+copy(sList[2],1,2)+':'+copy(sList[2],3,2)+':'+copy(sList[2],5,2);
+  //fs.DateSeparator:='-';
+  //fs.TimeSeparator:=':';
+  //fs.ShortDateFormat:='YYYY-MM-DD hh:nn:ss';
+  //i1:=StrtoDateTimeDef(s2,i1,fs);
   //==========
   
-  sList.Free;
+  //sList.Free;
     
-  ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  i0:=ini.ReadDateTime(FormatDateTime('YYYYMMDD',now),s1,0);
-  ini.Free;
+  //ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
+  //i0:=ini.ReadDateTime(FormatDateTime('YYYYMMDD',now),s1,0);
+  //ini.Free;
 
   ls:=Tstringlist.Create;
   ls.LoadFromFile(filename);
@@ -437,11 +438,11 @@ begin
   end;//}
   //==========
 
-  if i1<=i0 then begin ls.Free;exit;end;//该文件已经处理过或已处理过以前做的
+  //if i1<=i0 then begin ls.Free;exit;end;//该文件已经处理过或已处理过以前做的
   
-  ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  ini.WriteDateTime(FormatDateTime('YYYYMMDD',now),s1,i1);
-  ini.Free;
+  //ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
+  //ini.WriteDateTime(FormatDateTime('YYYYMMDD',now),s1,i1);
+  //ini.Free;
 
   if length(frmMain.memo1.Lines.Text)>=60000 then frmMain.memo1.Lines.Clear;//memo只能接受64K个字符
   frmMain.memo1.Lines.Add(filename);
@@ -459,6 +460,9 @@ begin
     end;
 
     if lsValue[0]='0' then SpecNo:=rightstr('0000'+lsValue[3],4);
+
+    if(lsValue[0]='00')and(lsValue.Count>=20) then
+      CheckDate:=StringReplace(lsValue[19],'/','-',[rfReplaceAll, rfIgnoreCase]);
 
     if lsValue[0]='1' then
     begin
@@ -481,12 +485,22 @@ begin
   if bRegister then
   begin
     FInts :=CreateOleObject('Data2LisSvr.Data2Lis');
-    FInts.fData2Lis(ReceiveItemInfo,(SpecNo),'',
+    FInts.fData2Lis(ReceiveItemInfo,(SpecNo),CheckDate,
       (GroupName),(SpecType),(SpecStatus),(EquipChar),
       (CombinID),'',(LisFormCaption),(ConnectString),
       (QuaContSpecNoG),(QuaContSpecNo),(QuaContSpecNoD),'',
       ifRecLog,true,'常规');
     if not VarIsEmpty(FInts) then FInts:= unAssigned;
+  end;
+
+  Try
+    FileSetAttr(filename,0);//修改文件属性为普通属性,不然可能无法删除
+    DeleteFile(filename);//删除文件
+  except
+    on E:Exception do
+    begin
+      frmMain.memo1.Lines.Add('设置文件属性或删除文件失败:'+E.Message+'【'+filename+'】');
+    end;
   end;
 end;
 
@@ -494,24 +508,25 @@ procedure TfrmMain.Timer1Timer(Sender: TObject);
 var
   qqq:boolean;
 
-  lsSection    :TStrings;
-  ini          :Tinifile;
-  i            :integer;
+  //lsSection    :TStrings;
+  //ini          :Tinifile;
+  //i            :integer;
 begin
   (Sender as TTimer).Enabled:=false;
 
-  lsSection:=Tstringlist.Create;
-  ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  ini.ReadSections(lsSection);
-  for i :=0  to lsSection.Count-1 do
-  begin
-    if (leftstr(lsSection[i],2)='20')and(lsSection[i]<>FormatDateTime('YYYYMMDD',now)) then ini.EraseSection(lsSection[i]);
-  end;
-  ini.Free;
-  lsSection.Free;
+  //lsSection:=Tstringlist.Create;
+  //ini:=TINIFILE.Create(ChangeFileExt(Application.ExeName,'.ini'));
+  //ini.ReadSections(lsSection);
+  //for i :=0  to lsSection.Count-1 do
+  //begin
+  //  if (leftstr(lsSection[i],2)='20')and(lsSection[i]<>FormatDateTime('YYYYMMDD',now)) then ini.EraseSection(lsSection[i]);
+  //end;
+  //ini.Free;
+  //lsSection.Free;
 
   qqq:=false;
-  findfile(qqq,PATH_RESULT,FormatDateTime(SdfDateFormat,now)+'_*.cdf',AFindCallBack,false,true);
+  //findfile(qqq,PATH_RESULT,FormatDateTime(SdfDateFormat,now)+'_*.cdf',AFindCallBack,false,true);
+  findfile(qqq,PATH_RESULT,'*_*.cdf',AFindCallBack,false,true);
 
   (Sender as TTimer).Enabled:=true;
 end;
