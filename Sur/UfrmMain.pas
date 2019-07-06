@@ -91,6 +91,7 @@ var
   //SdfDateFormat:string;//结果文件名的日期格式
   ifRecLog:boolean;//是否记录调试日志
   ExcludeLJBS:STRING;//排除联机标识
+  DataFileExtension:string;//数据文件后缀
 
 //  RFM:STRING;       //返回数据
   hnd:integer;
@@ -234,6 +235,8 @@ begin
 
   ValueFile:=ini.ReadString(IniSection,'接口文件','');
 
+  DataFileExtension:=trim(ini.ReadString(IniSection,'数据文件后缀','cdf'));
+  if DataFileExtension='' then DataFileExtension:='cdf';
   GroupName:=trim(ini.ReadString(IniSection,'工作组',''));
   EquipChar:=trim(uppercase(ini.ReadString(IniSection,'仪器字母','')));//读出来是大写就万无一失了
   SpecType:=ini.ReadString(IniSection,'默认样本类型','');
@@ -318,6 +321,7 @@ begin
   begin
     ss:='接口文件'+#2+'File'+#2+#2+'1'+#2+'注:一般为\Laboman4.0\lis_interface.ini'+#2+#3+
       //'结果文件名的日期格式'+#2+'Combobox'+#2+'YYYYMMDD'+#13+'YYYYMD'+#2+'0'+#2+'日期2015年1月20日,YYYYMMDD->20150120,YYYYMD->2015120'+#2+#3+
+      '数据文件后缀'+#2+'Edit'+#2+#2+'1'+#2+'一般的,填写cdf或sdf,默认值cdf'+#2+#3+
       '工作组'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '仪器字母'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '检验系统窗体标题'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
@@ -526,7 +530,7 @@ begin
 
   qqq:=false;
   //findfile(qqq,PATH_RESULT,FormatDateTime(SdfDateFormat,now)+'_*.cdf',AFindCallBack,false,true);
-  findfile(qqq,PATH_RESULT,'*_*.cdf',AFindCallBack,false,true);
+  findfile(qqq,PATH_RESULT,'*_*.'+DataFileExtension,AFindCallBack,false,true);
 
   (Sender as TTimer).Enabled:=true;
 end;
