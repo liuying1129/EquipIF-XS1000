@@ -1,0 +1,40 @@
+一、安装：
+	首先安装UriAccess3.0正式版本
+	安装完成后将光盘目录下 
+	sdfprocess.pbd
+	sdfprocess.exe
+	lis_interface.ini
+	REC1.ico
+	REC2.ico
+	REC3.ico  6个文件拷贝到 UriAccess3.0安装目录下，
+如果程序安装在C:\，那么目录就是C:\UriAccess3.0\
+
+二、设置：
+	然后进入软件，设置->系统设定
+
+	把启动通信程序时启动SDF通信传输 打钩选中
+
+	然后 工具->重起接口 或者 重新启动软件
+
+三、配置文件说明：
+lis_interface.ini中的修改规则如下:
+[lis]
+sample=false                             ；是否使用的状态
+path_sample=C:\UriAccess3.0\1              ；样本信息保存路径和文件夹
+big_sample=,                             ；分割符号
+small_sample=;
+result=true                              ；是否使用的状态
+path_result=C:\UriAccess3.0\2              ；检验结果保存路径和文件夹
+big_result=,                             ；分割符号
+small_result=;
+result_flag=2
+path_out=
+说明：启动SDF程序后，可以直接右键电脑屏幕右下角任务栏SDF程序“SDF通信设置”进行配置。
+
+四、输出文件格式：
+
+	0，检验日期，检验时间，样本号，仪器名称，项目数
+	1，项目名称，传输次数，项目结果，OD值，Cutoff值，结果标志（2：已审核），打印标志，描述信息，预留字段，检验分组
+	1，...
+	...
+	9，项目数
