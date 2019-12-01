@@ -92,6 +92,7 @@ var
   ifRecLog:boolean;//是否记录调试日志
   ExcludeLJBS:STRING;//排除联机标识
   DataFileExtension:string;//数据文件后缀
+  EquipUnid:string;//设备唯一编号
 
 //  RFM:STRING;       //返回数据
   hnd:integer;
@@ -245,6 +246,7 @@ begin
 
   LisFormCaption:=ini.ReadString(IniSection,'检验系统窗体标题','');
   ExcludeLJBS:=ini.ReadString(IniSection,'排除联机标识','');
+  EquipUnid:=ini.ReadString(IniSection,'设备唯一编号','');
 
   QuaContSpecNoG:=ini.ReadString(IniSection,'高值质控联机号','9999');
   QuaContSpecNo:=ini.ReadString(IniSection,'常值质控联机号','9998');
@@ -331,6 +333,7 @@ begin
       '开机自动运行'+#2+'CheckListBox'+#2+#2+'1'+#2+#2+#3+
       '调试日志'+#2+'CheckListBox'+#2+#2+'0'+#2+'注:强烈建议在正常运行时关闭'+#2+#3+
       '排除联机标识'+#2+'Edit'+#2+#2+'1'+#2+'多个联机标识用逗号分隔'+#2+#3+
+      '设备唯一编号'+#2+'Edit'+#2+#2+'1'+#2+#2+#3+
       '高值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2+#3+
       '常值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2+#3+
       '低值质控联机号'+#2+'Edit'+#2+#2+'2'+#2+#2;
@@ -491,7 +494,7 @@ begin
     FInts :=CreateOleObject('Data2LisSvr.Data2Lis');
     FInts.fData2Lis(ReceiveItemInfo,(SpecNo),CheckDate,
       (GroupName),(SpecType),(SpecStatus),(EquipChar),
-      (CombinID),'',(LisFormCaption),(ConnectString),
+      (CombinID),'{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}{!@#}'+EquipUnid,(LisFormCaption),(ConnectString),
       (QuaContSpecNoG),(QuaContSpecNo),(QuaContSpecNoD),'',
       ifRecLog,true,'常规');
     if not VarIsEmpty(FInts) then FInts:= unAssigned;
