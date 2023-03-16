@@ -4,30 +4,22 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms,
-  LYTray, Menus, StdCtrls, Buttons, ADODB,
-  ActnList, AppEvnts, ComCtrls, ToolWin, ExtCtrls,
-  registry,inifiles,Dialogs,
-  StrUtils, DB,ComObj,Variants;
+  Menus, StdCtrls, Buttons, ADODB,
+  ComCtrls, ToolWin, ExtCtrls,
+  inifiles,Dialogs,
+  StrUtils, DB,ComObj,Variants, CoolTrayIcon;
 
 type
   TfrmMain = class(TForm)
-    LYTray1: TLYTray;
     PopupMenu1: TPopupMenu;
     N1: TMenuItem;
     N2: TMenuItem;
     N3: TMenuItem;
     ADOConnection1: TADOConnection;
-    ApplicationEvents1: TApplicationEvents;
     CoolBar1: TCoolBar;
     ToolBar1: TToolBar;
-    ToolButton3: TToolButton;
-    ToolButton4: TToolButton;
     ToolButton7: TToolButton;
     ToolButton8: TToolButton;
-    ActionList1: TActionList;
-    editpass: TAction;
-    about: TAction;
-    stop: TAction;
     ToolButton2: TToolButton;
     Memo1: TMemo;
     BitBtn1: TBitBtn;
@@ -37,12 +29,12 @@ type
     ToolButton9: TToolButton;
     OpenDialog1: TOpenDialog;
     Timer1: TTimer;
+    LYTray1: TCoolTrayIcon;
     procedure N3Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     //增加病人信息表中记录,返回该记录的唯一编号作为检验结果表的外键
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure N1Click(Sender: TObject);
-    procedure ApplicationEvents1Activate(Sender: TObject);
     procedure ToolButton7Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
@@ -52,9 +44,7 @@ type
     procedure ToolButton5Click(Sender: TObject);
   private
     { Private declarations }
-    procedure WMSyscommand(var message:TWMMouse);message WM_SYSCOMMAND;
     procedure UpdateConfig;{配置文件生效}
-    function LoadInputPassDll:boolean;
     function MakeDBConn:boolean;
   public
     { Public declarations }
@@ -160,62 +150,31 @@ begin
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
-var
-  ctext        :string;
-  reg          :tregistry;
 begin
   ConnectString:=GetConnectString;
   
   UpdateConfig;
   if ifRegister then bRegister:=true else bRegister:=false;  
 
+  Caption:='数据接收服务'+ExtractFileName(Application.ExeName);
   lytray1.Hint:='数据接收服务'+ExtractFileName(Application.ExeName);
-
-//=============================初始化密码=====================================//
-    reg:=tregistry.Create;
-    reg.RootKey:=HKEY_CURRENT_USER;
-    reg.OpenKey('\sunyear',true);
-    ctext:=reg.ReadString('pass');
-    if ctext='' then
-    begin
-        reg:=tregistry.Create;
-        reg.RootKey:=HKEY_CURRENT_USER;
-        reg.OpenKey('\sunyear',true);
-        reg.WriteString('pass','JIHONM{');
-        //MessageBox(application.Handle,pchar('感谢您使用智能监控系统，'+chr(13)+'请记住初始化密码：'+'lc'),
-        //            '系统提示',MB_OK+MB_ICONinformation);     //WARNING
-    end;
-    reg.CloseKey;
-    reg.Free;
-//============================================================================//
 end;
 
 procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    if LoadInputPassDll then action:=cafree else action:=caNone;
+  action:=caNone;
+  LYTray1.HideMainForm;
 end;
 
 procedure TfrmMain.N3Click(Sender: TObject);
 begin
-    if not LoadInputPassDll then exit;
-    application.Terminate;
+  if (MessageDlg('退出后将不再接收设备数据,确定退出吗？', mtWarning, [mbYes, mbNo], 0) <> mrYes) then exit;
+  application.Terminate;
 end;
 
 procedure TfrmMain.N1Click(Sender: TObject);
 begin
-  show;
-end;
-
-procedure TfrmMain.ApplicationEvents1Activate(Sender: TObject);
-begin
-  hide;
-end;
-
-procedure TfrmMain.WMSyscommand(var message: TWMMouse);
-begin
-  inherited;
-  if message.Keys=SC_MINIMIZE then hide;
-  message.Result:=-1;
+  LYTray1.ShowMainForm;
 end;
 
 procedure TfrmMain.ToolButton7Click(Sender: TObject);
@@ -268,24 +227,6 @@ begin
   END else memo1.Lines.Add('没有找到文件'+ValueFile); 
 end;
 
-function TfrmMain.LoadInputPassDll: boolean;
-TYPE
-    TDLLFUNC=FUNCTION:boolean;
-VAR
-    HLIB:THANDLE;
-    DLLFUNC:TDLLFUNC;
-    PassFlag:boolean;
-begin
-    result:=false;
-    HLIB:=LOADLIBRARY('OnOffLogin.dll');
-    IF HLIB=0 THEN BEGIN SHOWMESSAGE(sCONNECTDEVELOP);EXIT; END;
-    DLLFUNC:=TDLLFUNC(GETPROCADDRESS(HLIB,'showfrmonofflogin'));
-    IF @DLLFUNC=NIL THEN BEGIN SHOWMESSAGE(sCONNECTDEVELOP);EXIT; END;
-    PassFlag:=DLLFUNC;
-    FREELIBRARY(HLIB);
-    result:=passflag;
-end;
-
 function TfrmMain.MakeDBConn:boolean;
 var
   newconnstr,ss: string;
@@ -319,8 +260,6 @@ procedure TfrmMain.ToolButton2Click(Sender: TObject);
 var
   ss:string;
 begin
-  if LoadInputPassDll then
-  begin
     ss:='接口文件'+#2+'File'+#2+#2+'1'+#2+'注:一般为\Laboman4.0\lis_interface.ini'+#2+#3+
       //'结果文件名的日期格式'+#2+'Combobox'+#2+'YYYYMMDD'+#13+'YYYYMD'+#2+'0'+#2+'日期2015年1月20日,YYYYMMDD->20150120,YYYYMD->2015120'+#2+#3+
       '数据文件后缀'+#2+'Edit'+#2+#2+'1'+#2+'一般的,填写cdf或sdf,默认值cdf'+#2+#3+
@@ -340,7 +279,6 @@ begin
 
   if ShowOptionForm('',Pchar(IniSection),Pchar(ss),Pchar(ChangeFileExt(Application.ExeName,'.ini'))) then
 	  UpdateConfig;
-  end;
 end;
 
 procedure TfrmMain.BitBtn2Click(Sender: TObject);
